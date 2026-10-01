@@ -230,6 +230,43 @@ def test_processing_requires_upload_and_mapping(client, sid):
     assert client.post(f"/api/sessions/{sid}/process").status_code == 409
 
 
+# --------------------------------------------------------------------------- #
+# Data slices (materialize frames for API-mode frontends)
+# --------------------------------------------------------------------------- #
+def test_data_slice_requires_mapping_first(client, sid):
+    _upload(client, sid, _csv_file())
+    assert client.get(f"/api/sessions/{sid}/data/mapped").status_code == 409
+
+
+def test_data_slice_mapped_after_mapping(client, sid):
+    _upload(client, sid, _csv_file())
+    _confirm_mapping(client, sid)
+    resp = client.get(f"/api/sessions/{sid}/data/mapped")
+    body = resp.get_json()
+    assert resp.status_code == 200
+    assert body["kind"] == "mapped"
+    assert body["count"] == 4
+    assert {row["order_id"] for row in body["rows"]} == {"ORD-1", "ORD-2", "ORD-3"}
+
+
+def test_data_slice_clean_and_flagged_after_processing(client, sid):
+    _run_full_flow(client, sid)
+    clean = client.get(f"/api/sessions/{sid}/data/clean").get_json()
+    flagged = client.get(f"/api/sessions/{sid}/data/flagged").get_json()
+    assert clean["count"] == 2
+    assert flagged["count"] == 1
+    assert all("_flag_reason" in row for row in flagged["rows"])
+    # Flagged rows never leak into the clean slice.
+    assert all("_flag_reason" not in row for row in clean["rows"])
+
+
+def test_data_slice_unknown_kind_is_400(client, sid):
+    _run_full_flow(client, sid)
+    resp = client.get(f"/api/sessions/{sid}/data/bogus")
+    assert resp.status_code == 400
+    assert "Unknown data kind" in resp.get_json()["error"]
+
+
 def test_summary_defaults_and_custom_controls(client, sid):
     _run_full_flow(client, sid)
 

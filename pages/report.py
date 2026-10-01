@@ -2,7 +2,7 @@
 import plotly.express as px
 import streamlit as st
 
-from core import config, reporting, theme, ui
+from core import config, service, theme, ui
 
 
 def _safe_index(options: list[str], preferred: str) -> int:
@@ -57,7 +57,7 @@ if not agg_options:
 aggregate_func = config.AGGREGATE_FUNCTIONS[func_label]
 
 try:
-    summary = reporting.build_summary(clean_subset, group_by, agg_col, aggregate_func)
+    summary = service.summary(ui.api_session_id(), group_by, agg_col, aggregate_func, clean_subset)
 except ValueError as exc:
     st.error(str(exc))
     ui.render_sidebar_footer()

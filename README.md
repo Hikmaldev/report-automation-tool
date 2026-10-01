@@ -51,6 +51,7 @@ state (FR-SES-01/02). No data is ever written to disk.
 | `PUT /api/sessions/<sid>/mapping` | Confirm mapping `{"mapping": {...}}`; missing required columns are reported |
 | `POST /api/sessions/<sid>/process` | Cleaning + validation; returns log & counts (FR-CLN-07, FR-VAL-05) |
 | `GET /api/sessions/<sid>/review` | Flagged rows with reasons as JSON (FR-VAL-03) |
+| `GET /api/sessions/<sid>/data/<kind>` | Materialize a frame as JSON: `mapped` \| `clean` \| `flagged` (for API-mode frontends) |
 | `GET /api/sessions/<sid>/report/columns` | Group/aggregate choices for the UI (FR-OUT-03) |
 | `GET /api/sessions/<sid>/report/summary?group_by=&aggregate_column=&aggregate_func=` | Summary table + chart data (FR-OUT-01/02) |
 | `GET /api/sessions/<sid>/export/cleaned?format=xlsx\|csv` | Clean dataset (FR-OUT-04) |
@@ -71,6 +72,30 @@ curl -s -X PUT http://localhost:5000/api/sessions/<sid>/mapping \
 curl -s -X POST http://localhost:5000/api/sessions/<sid>/process
 curl -s -o cleaned.xlsx "http://localhost:5000/api/sessions/<sid>/export/cleaned"
 ```
+
+## Frontend ↔ Backend (service layer)
+
+Every screen goes through `core/service.py` — pages never call the pipeline
+modules directly. It has two interchangeable backends with an identical
+interface, so the UI code does not know which one is active:
+
+| Mode | When | What happens |
+| --- | --- | --- |
+| `local` (default) | `REPORT_API_URL` is unset, or the API is unreachable | the in-process `core/` pipeline runs inside the Streamlit process |
+| `api` | `REPORT_API_URL` is set and `/api/health` answers | every page call (upload, mapping, process, summary, export) is delegated to the Flask backend over HTTP |
+
+```bash
+# optional: point the app at the Flask backend (falls back to local automatically)
+export REPORT_API_URL="http://localhost:5000"   # macOS / Linux
+$env:REPORT_API_URL = "http://localhost:5000"   # Windows PowerShell
+
+# optional: force a mode instead of auto-detecting
+export REPORT_API_MODE=api    # or: local
+```
+
+Deploying on Streamlit Cloud? Do nothing — the app runs in `local` mode there
+(Cloud runs a single process), and the Flask layer stays an optional
+integration for VPS/Render/Railway hosts.
 
 ## User flow (maps to the PRD)
 
@@ -105,6 +130,7 @@ core/                   # framework-independent pipeline modules
 ├── validation.py       # required/type checks, review table, split (§4.3)
 ├── reporting.py        # summary + chart data (§4.4)
 ├── export.py           # in-memory xlsx/csv bytes (§4.5)
+├── service.py          # facade: pages call this; local pipeline or Flask API (REPORT_API_URL)
 └── ui.py               # session helpers shared by pages (§7)
 backend/                # Flask REST API — same core, http layer only
 ├── app.py              # create_app factory: blueprints, CORS, JSON error handlers

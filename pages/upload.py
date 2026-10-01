@@ -1,7 +1,7 @@
 """Step 1 — Upload files (FR-UP-01 … FR-UP-05)."""
 import streamlit as st
 
-from core import config, ingestion, theme, ui
+from core import config, service, theme, ui
 
 ui.init_state()
 theme.render_theme()
@@ -23,15 +23,21 @@ uploaded = st.file_uploader(
 )
 
 if uploaded:
-    records, errors = ingestion.read_multiple_files(uploaded)
+    sid = ui.api_session_id()
+    records, errors = service.upload_files(sid, uploaded)
     existing = {r["name"]: r for r in st.session_state[ui.K_RAW]}
     removed = st.session_state[ui.K_REMOVED]
+    added = False
     for rec in records:
         if rec["name"] not in removed and rec["name"] not in existing:
             existing[rec["name"]] = rec
+            added = True
     st.session_state[ui.K_RAW] = list(existing.values())
     if errors:
         st.session_state[ui.K_FILE_ERRORS] = errors
+    if added:
+        # New input files invalidate everything derived from previous inputs.
+        ui.clear_derived_state()
 
 # File-level errors (FR-UP-02, FR-UP-04) — plain language, never a traceback.
 for err in st.session_state[ui.K_FILE_ERRORS]:
@@ -41,8 +47,10 @@ files = st.session_state[ui.K_RAW]
 
 
 def remove_file(name: str) -> None:
+    service.remove_file(ui.api_session_id(), name)
     st.session_state[ui.K_REMOVED].add(name)
     st.session_state[ui.K_RAW] = [r for r in st.session_state[ui.K_RAW] if r["name"] != name]
+    ui.clear_derived_state()
 
 
 if files:

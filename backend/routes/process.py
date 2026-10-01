@@ -85,6 +85,36 @@ def review_table(sid: str):
     )
 
 
+@bp.get("/api/sessions/<sid>/data/<kind>")
+def data_slice(sid: str, kind: str):
+    """Materialize a DataFrame as JSON for API-mode frontends.
+
+    ``kind`` selects which frame: ``mapped`` (mapping confirmed), ``clean``
+    (rows safe for reporting) or ``flagged`` (rows needing review).
+    """
+    data = session_data(sid)
+    if kind == "mapped":
+        if data["mapped"] is None:
+            raise ApiError(409, "Confirm the column mapping first (PUT /api/sessions/<sid>/mapping).")
+        frame = data["mapped"]
+    elif kind == "clean":
+        _require_processed(data)
+        frame = data["clean_subset"] if data["clean_subset"] is not None else pd.DataFrame()
+    elif kind == "flagged":
+        _require_processed(data)
+        frame = data["flagged"] if data["flagged"] is not None else pd.DataFrame()
+    else:
+        raise ApiError(400, "Unknown data kind. Use 'mapped', 'clean', or 'flagged'.")
+    return jsonify(
+        {
+            "kind": kind,
+            "columns": list(frame.columns),
+            "rows": records_from_df(frame),
+            "count": int(len(frame)),
+        }
+    )
+
+
 def _missing_required(data: dict) -> list[str]:
     from core import ingestion
 

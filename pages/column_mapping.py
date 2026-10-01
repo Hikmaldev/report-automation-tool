@@ -6,7 +6,7 @@ confirm or adjust which standard field each one maps to before cleaning runs.
 import pandas as pd
 import streamlit as st
 
-from core import config, ingestion, theme, ui
+from core import config, ingestion, service, theme, ui
 
 ui.init_state()
 theme.render_theme()
@@ -18,7 +18,8 @@ if not ui.has_data(ui.K_RAW):
     st.stop()
 
 records = st.session_state[ui.K_RAW]
-frame = ingestion.build_mapping_frame(records)
+sid = ui.api_session_id()
+frame = service.mapping_frame(sid, records)
 
 # Merge any previously confirmed edits with freshly detected columns.
 previous = st.session_state.get(ui.K_MAPPING_FRAME)
@@ -82,9 +83,13 @@ with st.expander("Required fields for this report", expanded=False):
 
 if st.button("Confirm mapping & continue →", type="primary", disabled=bool(missing)):
     st.session_state[ui.K_COLUMN_MAP] = column_map
-    mapped = ingestion.apply_mapping(records, column_map)
-    st.session_state[ui.K_MAPPED] = mapped
-    st.success(f"Combined dataset ready: {len(mapped):,} rows across {len(records)} file(s).")
+    try:
+        result = service.apply_mapping(sid, column_map, records)
+    except Exception as exc:  # noqa: BLE001 - user-safe message (PRD §8.3)
+        st.error(str(exc))
+        st.stop()
+    st.session_state[ui.K_MAPPED] = result["mapped"]
+    st.success(f"Combined dataset ready: {result['mapped_rows']:,} rows across {len(records)} file(s).")
     st.switch_page("pages/processing.py")
 
 ui.render_sidebar_footer()

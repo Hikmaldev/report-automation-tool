@@ -16,40 +16,87 @@ K_CLEAN_SUBSET = "clean_df"
 K_CLEANING_LOG = "cleaning_log"
 K_SUMMARY = "summary_df"
 K_SUMMARY_CONFIG = "summary_config"
+K_API_SID = "api_session_id"
+
+# Derived keys that become meaningless when the uploaded files change.
+_DERIVED_KEYS = (
+    K_MAPPING_FRAME,
+    K_COLUMN_MAP,
+    K_MAPPED,
+    K_CLEANED,
+    K_FLAGGED,
+    K_CLEAN_SUBSET,
+    K_CLEANING_LOG,
+    K_SUMMARY,
+    K_SUMMARY_CONFIG,
+)
+
+_DEFAULTS = {
+    K_RAW: [],
+    K_FILE_ERRORS: [],
+    K_REMOVED: set(),
+    K_MAPPING_FRAME: None,
+    K_COLUMN_MAP: {},
+    K_MAPPED: None,
+    K_CLEANED: None,
+    K_FLAGGED: None,
+    K_CLEAN_SUBSET: None,
+    K_CLEANING_LOG: {},
+    K_SUMMARY: None,
+    K_SUMMARY_CONFIG: {"group_by": None, "aggregate": None, "function": "sum"},
+    K_API_SID: None,
+}
 
 
 def init_state() -> None:
     """Seed session_state with empty containers (idempotent)."""
-    defaults = {
-        K_RAW: [],
-        K_FILE_ERRORS: [],
-        K_REMOVED: set(),
-        K_MAPPING_FRAME: None,
-        K_COLUMN_MAP: {},
-        K_MAPPED: None,
-        K_CLEANED: None,
-        K_FLAGGED: None,
-        K_CLEAN_SUBSET: None,
-        K_CLEANING_LOG: {},
-        K_SUMMARY: None,
-        K_SUMMARY_CONFIG: {"group_by": None, "aggregate": None, "function": "sum"},
-    }
-    for key, value in defaults.items():
+    for key, value in _DEFAULTS.items():
         if key not in st.session_state:
             st.session_state[key] = value
 
 
+def api_session_id() -> str | None:
+    """Id of the backend session (API mode), created lazily; None when local."""
+    from core import service
+
+    if service.backend_mode() != "api":
+        return None
+    if not st.session_state.get(K_API_SID):
+        st.session_state[K_API_SID] = service.new_session()
+    return st.session_state[K_API_SID]
+
+
+def clear_derived_state() -> None:
+    """Reset processing results because the input files changed."""
+    for key in _DERIVED_KEYS:
+        st.session_state[key] = None if key != K_COLUMN_MAP and key != K_SUMMARY_CONFIG else (
+            {} if key == K_COLUMN_MAP else {"group_by": None, "aggregate": None, "function": "sum"}
+        )
+
+
 def reset_session() -> None:
     """Clear all session data (FR-SES-02) without restarting the app."""
+    from core import service
+
+    sid = st.session_state.get(K_API_SID)
+    if sid:
+        service.reset_session(sid)
     for key in list(st.session_state.keys()):
         del st.session_state[key]
 
 
 def render_sidebar_footer() -> None:
-    """Privacy note + reset control shown under the navigation menu."""
+    """Privacy note + backend indicator + reset control under the navigation."""
     with st.sidebar:
         st.markdown("---")
         st.caption("🔒 **Your data stays private**  \nFiles are processed in memory for this session and never stored.")
+        from core import service
+
+        info = service.backend_info()
+        if info["mode"] == "api":
+            st.caption(f"⚙️ **Backend:** API · `{info['url']}`")
+        else:
+            st.caption("⚙️ **Backend:** local (in-process pipeline)")
         if st.button("Reset session", width="stretch", type="secondary", key="reset_session"):
             reset_session()
             st.rerun()

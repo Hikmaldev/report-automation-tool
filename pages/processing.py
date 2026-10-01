@@ -2,7 +2,7 @@
 import pandas as pd
 import streamlit as st
 
-from core import cleaning, config, theme, ui, validation
+from core import service, theme, ui
 
 ui.init_state()
 theme.render_theme()
@@ -23,41 +23,25 @@ theme.page_header(
 )
 
 
-def run_pipeline(source_df: pd.DataFrame) -> None:
-    """Clean + validate in-memory and store results in session state."""
-    with st.status("Running cleaning & validation…", expanded=True) as status:
-        st.write("Removing exact duplicates…")
-        cleaned, dups = cleaning.deduplicate(source_df)
-        log = {"duplicates_removed": dups}
-
-        st.write("Standardizing dates (YYYY-MM-DD)…")
-        cleaned = cleaning.standardize_dates(cleaned, config.DATE_COLUMNS, log)
-
-        st.write("Standardizing numbers (currencies, separators)…")
-        cleaned = cleaning.standardize_numbers(cleaned, config.NUMERIC_COLUMNS, log)
-
-        st.write("Standardizing text (whitespace, casing)…")
-        cleaned = cleaning.standardize_text(cleaned, config.TEXT_COLUMNS, config.CASING_COLUMNS, log)
-
-        st.write("Validating required fields and formats…")
-        masks = validation.validate_required_fields_by_column(cleaned, config.REQUIRED_COLUMNS)
-        masks.update(
-            validation.validate_types(cleaned, source_df, config.NUMERIC_COLUMNS, config.DATE_COLUMNS)
-        )
-        flagged = validation.build_review_table(cleaned, masks)
-        clean_subset, flagged = validation.split_clean_and_flagged(cleaned, flagged)
-
-        status.update(label="Processing complete", state="complete", expanded=False)
-
-    st.session_state[ui.K_CLEANED] = cleaned
-    st.session_state[ui.K_FLAGGED] = flagged
-    st.session_state[ui.K_CLEAN_SUBSET] = clean_subset
-    st.session_state[ui.K_CLEANING_LOG] = log
+def run_processing(button_clicked: bool) -> None:
+    """Clean + validate via the service (local pipeline or Flask API)."""
+    if not button_clicked:
+        return
+    try:
+        with st.spinner("Running cleaning & validation…"):
+            result = service.run_process(ui.api_session_id(), mapped)
+    except Exception as exc:  # noqa: BLE001 - user-safe message (PRD §8.3)
+        st.error(str(exc))
+        st.stop()
+    st.session_state[ui.K_CLEANED] = result["cleaned"]
+    st.session_state[ui.K_FLAGGED] = result["flagged"]
+    st.session_state[ui.K_CLEAN_SUBSET] = result["clean_subset"]
+    st.session_state[ui.K_CLEANING_LOG] = result["log"]
+    st.rerun()
 
 
 if st.button("Run cleaning & validation", type="primary"):
-    run_pipeline(mapped)
-    st.rerun()
+    run_processing(True)
 
 if ui.has_data(ui.K_CLEANED):
     cleaned = st.session_state[ui.K_CLEANED]
