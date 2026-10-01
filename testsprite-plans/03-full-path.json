@@ -1,0 +1,19 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Full happy path: upload, map, process, summary",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the upload page: http://127.0.0.1:8501/upload" },
+    { "type": "action", "description": "Set the file input to a file named 'sales.csv' whose UTF-8 content is exactly:\nOrder ID,Order Date,Customer Name,Region,Qty.,Revenue\nORD-1,09/01/2026,Acme Inc,north,2,\"$1,240.00\"\nORD-1,09/01/2026,Acme Inc,north,2,\"$1,240.00\"\nORD-2,2026-09-02,Beta Co,south,3,\"€ 3.040,00\"\nORD-3,31/09/2026,Gamma Ltd,north,4,not available" },
+    { "type": "assertion", "description": "'Files ready to process' appears and lists 'sales.csv' with 4 rows." },
+    { "type": "action", "description": "Click the primary button 'Continue to column mapping →'." },
+    { "type": "assertion", "description": "The column mapping screen appears showing a table with a row whose source column is 'Order ID' mapped to standard field 'order_id', and a row 'Revenue' mapped to 'revenue'. The required fields note lists order_id, date, customer, region and revenue." },
+    { "type": "action", "description": "The screener already pre-fills correct standard field suggestions for every known column — do not change them. Click the primary button 'Confirm mapping & continue →'." },
+    { "type": "assertion", "description": "A success message 'Combined dataset ready: 4 rows across 1 file(s).' appears and the Processing page opens." },
+    { "type": "action", "description": "On the Processing page click the primary button 'Run cleaning & validation' and wait for the results." },
+    { "type": "assertion", "description": "Metric cards appear including 'Rows combined' = 4, 'Duplicates removed' = 1, 'Rows flagged' = 1 and 'Clean rows for reporting' = 2. A warning mentions '1 rows were flagged'." },
+    { "type": "assertion", "description": "A 'Cleaning log' table appears with a row labeled 'Duplicates Removed'." },
+    { "type": "action", "description": "Click the primary button 'View summary report →'." },
+    { "type": "assertion", "description": "The Summary report page shows a heading 'Summary table', a chart, and a total caption of the form 'Total: ... across 2 group(s) from 2 clean rows.'" }
+  ]
+}

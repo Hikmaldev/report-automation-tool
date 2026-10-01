@@ -153,6 +153,29 @@ unit-tested without any app running — and are reused as-is by both frontends.
 `tests/test_api.py` drives the full backend flow through Flask's test client
 (upload → mapping → process → review → summary → exports → reset).
 
+### Browser end-to-end (TestSprite)
+
+Six browser tests run the real Streamlit app against a local instance through
+the TestSprite CLI (sources in `testsprite-code/`, original plans in
+`testsprite-plans/`):
+
+```bash
+# start the app, then (from the project root)
+testsprite test run <test-id>... --local 8501
+```
+
+| Test | ID |
+| --- | --- |
+| Landing dashboard loads | `19d6cd24-2050-45c3-818c-a0e55a55c4f0` |
+| Upload accepts a CSV and reports a broken file | `5606008e-5f01-4d15-85ec-af1f3366f0e0` |
+| Full happy path: upload, map, process, summary | `3153a913-0d4e-423b-934a-a1f2f92069a9` |
+| Mapping blocks processing when required columns are missing | `9ea3c290-44ef-4ae3-ab20-fd689147d8b7` |
+| Review table shows flagged rows with reasons | `dfeb59cf-aa79-4fce-937f-78e77c07c68a` |
+| Download center offers xlsx and csv for every artifact | `7faf0db6-d2be-4b39-8502-b8d19eb99d28` |
+
+Project (TestSprite): `Report Automation Tool` (`4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1`,
+frontend, local :8501).
+
 ## Notes
 
 - Python 3.10+ (Python 3.11+ recommended by the PRD).

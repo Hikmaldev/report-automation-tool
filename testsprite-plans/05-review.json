@@ -1,0 +1,15 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Review table shows flagged rows with reasons",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the upload page: http://127.0.0.1:8501/upload" },
+    { "type": "action", "description": "Set the file input to a file named 'sales.csv' whose UTF-8 content is exactly:\nOrder ID,Order Date,Customer Name,Region,Qty.,Revenue\nORD-1,09/01/2026,Acme Inc,north,2,\"$1,240.00\"\nORD-2,31/09/2026,Beta Co,south,3,not available" },
+    { "type": "action", "description": "Click the primary button 'Continue to column mapping →', keep the suggested mappings unchanged, then click 'Confirm mapping & continue →'." },
+    { "type": "action", "description": "On the Processing page click 'Run cleaning & validation' and wait for the results to appear." },
+    { "type": "action", "description": "Click the button 'Review flagged rows →'." },
+    { "type": "assertion", "description": "The review page heading 'Rows that need your attention' is visible together with an info line '1 rows flagged out of 3 total rows'." },
+    { "type": "assertion", "description": "A table shows the flagged row with a reason containing 'Invalid date' and 'Invalid amount' (the value 'not available')." },
+    { "type": "assertion", "description": "Two download buttons labeled 'Download as .xlsx' and 'Download as .csv' are visible, plus a primary button 'Continue to download center →'." }
+  ]
+}

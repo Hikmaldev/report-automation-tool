@@ -1,0 +1,13 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Upload accepts a CSV and reports a broken file",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the upload page: http://127.0.0.1:8501/upload" },
+    { "type": "action", "description": "Set the file input to a file named 'sales.csv' whose UTF-8 content is exactly:\nOrder ID,Order Date,Customer Name,Region,Qty.,Revenue\nORD-1,09/01/2026,Acme Inc,north,2,\"$1,240.00\"\nORD-2,2026-09-02,Beta Co,south,3,\"€ 3.040,00\"\nORD-3,31/09/2026,Gamma Ltd,north,4,not available" },
+    { "type": "assertion", "description": "A section titled 'Files ready to process' appears listing the file 'sales.csv' with its row count (3 rows) and column count (6 columns)." },
+    { "type": "action", "description": "Additionally set the same file input to a second file named 'broken.csv' whose content is:\nOrder ID,Order Date,Customer Name\nORD-1,09/01/2026,Acme Inc\nORD-2,2026-09-02" },
+    { "type": "assertion", "description": "An error message appears showing the filename 'broken.csv' and the text 'could not be read' (plain-language error, no traceback)." },
+    { "type": "assertion", "description": "A primary button labeled 'Continue to column mapping →' is visible." }
+  ]
+}

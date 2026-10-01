@@ -1,0 +1,12 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Mapping blocks processing when required columns are missing",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the upload page: http://127.0.0.1:8501/upload" },
+    { "type": "action", "description": "Set the file input to a file named 'minimal.csv' whose UTF-8 content is exactly:\nName,Value\nAcme,100\nBeta,200" },
+    { "type": "action", "description": "Click the primary button 'Continue to column mapping →'." },
+    { "type": "assertion", "description": "A warning appears containing 'Missing required columns' and the names order_id, date, customer, region and revenue." },
+    { "type": "assertion", "description": "The button 'Confirm mapping & continue →' is present but disabled (processing cannot continue)." }
+  ]
+}

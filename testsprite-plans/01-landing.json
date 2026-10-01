@@ -1,0 +1,11 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Landing dashboard loads",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the app root: http://127.0.0.1:8501" },
+    { "type": "assertion", "description": "The page shows the heading 'Good morning, Alex' and the subtitle 'Turn your raw exports into a report you can trust.'" },
+    { "type": "assertion", "description": "The left sidebar contains a navigation item labeled 'Upload files' and an item labeled 'Download center'." },
+    { "type": "assertion", "description": "The sidebar shows a 'Reset session' button." }
+  ]
+}

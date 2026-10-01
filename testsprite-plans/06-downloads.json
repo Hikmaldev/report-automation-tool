@@ -1,0 +1,15 @@
+{
+  "projectId": "4900cd2c-e001-40d1-9d8c-3a4e5c17cdb1",
+  "type": "frontend",
+  "name": "Download center offers xlsx and csv for every artifact",
+  "planSteps": [
+    { "type": "action", "description": "Navigate to the upload page: http://127.0.0.1:8501/upload" },
+    { "type": "action", "description": "Set the file input to a file named 'sales.csv' whose UTF-8 content is exactly:\nOrder ID,Order Date,Customer Name,Region,Qty.,Revenue\nORD-1,09/01/2026,Acme Inc,north,2,\"$1,240.00\"\nORD-2,31/09/2026,Beta Co,south,3,not available" },
+    { "type": "action", "description": "Click 'Continue to column mapping →', keep the suggested mappings unchanged, click 'Confirm mapping & continue →', then on Processing click 'Run cleaning & validation' and wait for results." },
+    { "type": "action", "description": "Open the download center by clicking the sidebar navigation item labeled 'Download center'." },
+    { "type": "assertion", "description": "The page heading 'Your report package is ready' is visible with three sections titled 'Clean dataset', 'Summary report' and 'Flagged rows'." },
+    { "type": "assertion", "description": "The Clean dataset section shows '1 validated rows' and two buttons 'Download .xlsx' and 'Download .csv'." },
+    { "type": "assertion", "description": "The Summary report section shows a caption '1 group(s)' and a 'Download .xlsx' button." },
+    { "type": "assertion", "description": "The Flagged rows section shows '1 rows' and both 'Download .xlsx' and 'Download .csv' buttons." }
+  ]
+}
