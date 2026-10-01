@@ -9,9 +9,9 @@ theme.render_theme()
 theme.render_sidebar("overview")
 
 theme.page_header(
-    "Thursday, October 1, 2026 · Report run #024",
-    "Good morning, Alex",
-    "Turn your raw exports into a report you can trust.",
+    "Your report workspace",
+    "Turn raw exports into trusted reports",
+    "Upload your files, review the results, and download a report you can trust.",
 )
 
 processed = ui.has_data(ui.K_CLEANED)
