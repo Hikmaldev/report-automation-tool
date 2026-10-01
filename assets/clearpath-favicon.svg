@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Clearpath report mark</title>
+  <desc id="desc">Three rising report bars connected by a clear upward path</desc>
+  <rect width="64" height="64" rx="16" fill="#f1f6f2"/>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="#d8e8dc" stroke-width="2"/>
+  <rect x="12" y="34" width="9" height="18" rx="4" fill="#8fc5a6"/>
+  <rect x="27" y="25" width="9" height="27" rx="4" fill="#5fa786"/>
+  <rect x="42" y="16" width="9" height="36" rx="4" fill="#327c68"/>
+  <path d="M12 42.5 25 34 38 27 51 15" fill="none" stroke="#203f38" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+  <path d="m44.5 15 6.5 0 0 6.5" fill="none" stroke="#203f38" stroke-linecap="round" stroke-linejoin="round" stroke-width="4"/>
+</svg>

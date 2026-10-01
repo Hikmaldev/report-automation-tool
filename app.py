@@ -9,7 +9,7 @@ import streamlit as st
 
 st.set_page_config(
     page_title="Clearpath · Report Automation",
-    page_icon="🧾",
+    page_icon="assets/clearpath-favicon.svg",
     layout="wide",
     initial_sidebar_state="expanded",
 )
