@@ -6,6 +6,7 @@
 ![Pandas](https://img.shields.io/badge/Pandas-2.x-150458?logo=pandas&logoColor=white)
 ![Plotly](https://img.shields.io/badge/Plotly-Charts-3F4F75?logo=plotly&logoColor=white)
 ![pytest](https://img.shields.io/badge/tests-pytest%2062%20%2B%20TestSprite%206-green)
+![License](https://img.shields.io/badge/License-MIT-green)
 
 **Clearpath** is a report automation tool that takes several raw Excel/CSV exports,
 cleans them, flags anything questionable, and produces one consolidated report with
@@ -317,6 +318,12 @@ frontend, local :8501).
 
 - Only `.xlsx` and `.csv` are supported (MVP scope)
 - Multi-sheet Excel, scheduled imports and multi-user accounts are out of scope
+
+---
+
+## 📜 License
+
+This project is licensed under the [MIT License](LICENSE).
 
 ---
 
