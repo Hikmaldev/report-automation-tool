@@ -1,4 +1,4 @@
-"""Overview / home screen — mirrors the static index.html dashboard."""
+"""Overview / home screen — landing dashboard with session metrics."""
 import pandas as pd
 import streamlit as st
 
