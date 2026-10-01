@@ -1,6 +1,8 @@
 """Small UI helpers shared across pages (Design doc §7)."""
 from __future__ import annotations
 
+from copy import deepcopy
+
 import streamlit as st
 
 # Keys mirrored from Design doc §7.
@@ -52,7 +54,11 @@ def init_state() -> None:
     """Seed session_state with empty containers (idempotent)."""
     for key, value in _DEFAULTS.items():
         if key not in st.session_state:
-            st.session_state[key] = value
+            # Mutable defaults must be copied per Streamlit session. Reusing
+            # the module-level list/set/dict would make state isolation
+            # dependent on object mutation and could leak values between
+            # browser sessions in long-lived app processes.
+            st.session_state[key] = deepcopy(value)
 
 
 def api_session_id() -> str | None:
