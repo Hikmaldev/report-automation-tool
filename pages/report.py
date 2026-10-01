@@ -10,6 +10,14 @@ def _safe_index(options: list[str], preferred: str) -> int:
     return options.index(preferred) if preferred in options else 0
 
 
+def _format_total(value) -> str:
+    """Format a report total without allowing presentation to crash the page."""
+    try:
+        return f"{float(value):,.2f}"
+    except (TypeError, ValueError):
+        return str(value)
+
+
 ui.init_state()
 theme.render_theme()
 theme.render_sidebar("report")
@@ -39,7 +47,10 @@ if flagged_count:
 data_columns = [c for c in clean_subset.columns if c != "_source_file"]
 numeric_columns = list(clean_subset.select_dtypes(include="number").columns)
 group_options = data_columns
-agg_options = data_columns if numeric_columns else []
+# Aggregation only makes sense for numeric columns. Keeping text columns out of
+# this selector also prevents pandas from concatenating strings for Sum/Count
+# and avoids presentation errors when formatting the total below.
+agg_options = [c for c in data_columns if c in numeric_columns]
 
 c1, c2, c3, c4 = st.columns(4)
 group_by = c1.selectbox("Group rows by", group_options, index=_safe_index(group_options, "region"))
@@ -102,6 +113,6 @@ col_config = {
 st.dataframe(summary, hide_index=True, width="stretch", column_config=col_config)
 
 total = summary[agg_col].sum()
-st.caption(f"**Total: {total:,.2f}** across {len(summary):,} group(s) from {len(clean_subset):,} clean rows.")
+st.caption(f"**Total: {_format_total(total)}** across {len(summary):,} group(s) from {len(clean_subset):,} clean rows.")
 
 ui.render_sidebar_footer()
